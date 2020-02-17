@@ -1,0 +1,10 @@
+__pycache__
+*.txt
+*.pdf
+*lab*
+*content*
+!1/plans/*.txt
+!*lab*.pdf
+!*lab*.tex
+!*lab*.py
+!*content*.tex
