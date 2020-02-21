@@ -1,11 +1,14 @@
 ﻿import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import re
 from numpy.linalg import inv, det, eigvals, norm
 
+
+pd.set_option('precision', 2)
 n = 3
 m = 3
-points_count = 21
+points_count = 51
 
 def f(theta, x):
     return theta[0] + theta[1]*x + theta[2]*x**2
@@ -23,7 +26,7 @@ def f_vector_T(x):
 class Lab1():
     '''
     Класс для 1 лабораторной работы
-    Для стандартизации все критерии ущют минимальное значение
+    Для стандартизации все критерии ищют минимальное значение
     '''
     def __init__(self):
         ''' Выделение памяти под массивы '''
@@ -74,6 +77,44 @@ class Lab1():
             '3.txt',
             '4.txt'
             ]
+        with open('report/matricies_M.tex', 'w') as f:
+            f.write('\\begin{tabular}{|c|c|c|c|}\n')
+            f.write('\hline\n')
+            f.write('\tvariant 1 & variant 2 & variant 3 & variant 4 \\\ \n')
+            f.write('\hline\n')
+            s = ''
+            for plan_file in plan_files:
+                s += '&'
+                self.read_plan_from_file('plans/' + plan_file)
+                self.build_matrix_M()
+                self.build_matrix_D()
+                df = pd.DataFrame(data = self.M)
+                s += df.to_latex(index=False, header = False, column_format='ccc')
+            s = re.sub(r'\\[a-z]+rule\n', '', s)# удаляем \toprule и \bottomrule
+            s = re.sub(r'\n&', ' &\n', s)       # переносим &
+            f.write(s[1:-1] + ' \\\\ \n')
+            f.write('\hline\n\end{tabular}')            
+
+        with open('report/matricies_D.tex', 'w') as f:
+            f.write('\\begin{tabular}{|c|c|c|c|}\n')
+            f.write('\hline\n')
+            f.write('\tvariant 1 & variant 2 & variant 3 & variant 4 \\\ \n')
+            f.write('\hline\n')
+            s = ''
+            for plan_file in plan_files:
+                s += '&'
+                self.read_plan_from_file('plans/' + plan_file)
+                self.build_matrix_M()
+                self.build_matrix_D()
+                df = pd.DataFrame(data = self.D)
+                s += df.to_latex(index=False, header = False, column_format='ccc')
+            s = re.sub(r'\\[a-z]+rule\n', '', s)# удаляем \toprule и \bottomrule
+            s = re.sub(r'\n&', ' &\n', s)       # переносим &
+            f.write(s[1:-1] + ' \\\\ \n')
+            f.write('\hline\n\end{tabular}')
+
+
+
         criterion_files = [
             'D.txt',
             'A.txt',
@@ -95,7 +136,6 @@ class Lab1():
 
         i_vec = np.ndarray(4)
         cr_vec = np.ndarray(4)
-        pd.set_option('precision', 3)
         table = pd.DataFrame()
 
         # для каждого критерия
