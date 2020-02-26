@@ -29,10 +29,8 @@
 \section{Анализ}
 
 В рамках работы исследуется общая линейная модель:
-
-\[
-y = f^T(x)\Theta + \varepsilon = \sum_{l=1}^m f_l(x)\Theta_l + \varepsilon
-\]
+\[ y = f^T(x)\Theta + \varepsilon = \sum_{l=1}^m f_l(x)\Theta_l + \varepsilon \]
+\[ y = \Theta_0 + \Theta_1 \cdot x + \Theta_2 \cdot x^2 \]
 
 Исходя из варианта задания (1) эксперимент проводится в трёх точках -1, 0, 1
 
@@ -48,7 +46,6 @@ y = f^T(x)\Theta + \varepsilon = \sum_{l=1}^m f_l(x)\Theta_l + \varepsilon
 \] 
 
 {\bf Информационной матрицей} дискретного непрерывного плана называется величина
-
 \[M = \sum_{j=1}^n p_j f(x_j)f^T(x_j) = \frac{X^T X}{N}\]
 
 Матрица, обратная к информационной, называется {\bf дисперсионной}
@@ -62,10 +59,26 @@ y = f^T(x)\Theta + \varepsilon = \sum_{l=1}^m f_l(x)\Theta_l + \varepsilon
 \[ \Lambda-\text{оптимальности } \varepsilon^* = Arg \min_{\varepsilon} \sum_{i=1}^n [ \lambda_j(D(\varepsilon)) - \overline{\lambda}(D(\varepsilon)) ]^2 \]
 \[ MV-\text{оптимальности } \varepsilon^* = Arg \min_{\varepsilon} \max_i D_{ii}(\varepsilon) \]
 \[ G-\text{оптимальности } \varepsilon^* = Arg \min_{\varepsilon} \max_{x \in \hat{X}} d(x, \varepsilon) \]
+\[ d(x, \varepsilon) = f^T(x) M^{-1} f(x) \]
 
 
 %-------------------------------------------------------------------------------
 \section{Выбор оптимального плана}
+
+В каждом из 4 вариантов эксперимент проводится в трёх точках: -1, 0, 1
+
+\( y = \Theta_0 + \Theta_1 \cdot x + \Theta_2 \cdot x^2 \)
+
+\begin{tabular}{|c|c|c|c|}
+\hline
+	№ & $p_1$ & $p_2$ & $p_3$ \\ 
+\hline
+	1 & 0.2 & 0.6 & 0.2 \\ 
+	2 & 0.25 & 0.5 & 0.25 \\ 
+	3 & 0.1884 & 0.6233 & 0.1884 \\ 
+	4 & 0.333 & 0.333 & 0.333 \\
+\hline
+\end{tabular}
 
 Найдём информационные и дисперсионные матрицы для каждого из вариантов:
 
