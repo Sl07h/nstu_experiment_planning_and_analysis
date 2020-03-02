@@ -3,6 +3,7 @@ __pycache__
 *.pdf
 *lab*
 *content*
+*plan*.png
 !1/plans/*.txt
 !*lab*.pdf
 !*lab*.tex
