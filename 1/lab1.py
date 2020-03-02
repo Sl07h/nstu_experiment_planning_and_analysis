@@ -157,7 +157,9 @@ class Lab1():
             df = pd.DataFrame(data = d)
             table = df.join(table, lsuffix='_caller', rsuffix='_other')
         with open(filename, 'w') as f:
-            f.writelines(table.to_latex(index=False))    
+            s = table.to_latex(index=False)
+            s = re.sub(r'D &', '\\\\multicolumn{2}{l}{D} &', s)
+            f.writelines(s)    
 
     def draw_plot(self):
         ''' Отрисовка зависимости D(E) от q '''
