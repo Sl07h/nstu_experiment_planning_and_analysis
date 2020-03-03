@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from numpy.linalg import det, inv
 
 
-pd.set_option('precision', 2)
-n = 25  # число точек сетки
-m = 6   # число параметров a + b*x + c*y + d*x*y + e*x^2 + f*y^2 
-k = 2   # число переменных 2: (x,y)
+plt.rcParams.update({'font.size': 14})
+k = 2       # число переменных 2: (x,y)
+m = 6       # число параметров a + b*x + c*y + d*x*y + e*x^2 + f*y^2 
+n = 25      # число точек сетки
+width = 5   # сторона сетки
 
 def f(theta, x):
     return  theta[0] + \
@@ -52,6 +52,7 @@ class Lab2():
         self.p = np.ndarray(n)
         self.new_x = np.ndarray((n, k))
         self.new_p = np.ndarray(n)
+        self.t = np.linspace(-1, 1, width)
         self.M = np.ndarray((m, m))
         self.alpha = 1 / n
         self.gamma = 2
@@ -60,10 +61,9 @@ class Lab2():
 
     def generate_initial_guess(self):
         ''' Задаём начальное приближение '''
-        t = np.linspace(-1, 1, 5)
         i = 0
-        for x1 in t:
-            for x2 in t:
+        for x1 in self.t:
+            for x2 in self.t:
                 self.x[i] = np.array([x1, x2])
                 i+=1
         self.p = np.full(n, 1/n)
@@ -84,7 +84,7 @@ class Lab2():
     def is_plan_optimal(self):
         '''
         Проверяем выполнение необходимых и достаточных
-        условий оптимальности планов
+        условий оптимальности плана
         '''
         max_fi = self.max_fi()
         delta = 0.01 * abs(max_fi)
@@ -96,25 +96,23 @@ class Lab2():
     def clear_plan(self):
         ''' Процедура очистки плана '''
         global n
-        
-        t = np.linspace(-1, 1, 5)
         i = 0
-        for x1 in t:
-            for x2 in t:
+        for x1 in self.t:
+            for x2 in self.t:
                 self.new_x[i] = np.array([x1, x2])
                 i+=1
-        self.new_p = np.zeros(25)
+        self.new_p = np.zeros(width**2)
 
         for point, weigth in zip(self.x, self.p):
-            for i in range(5):
-                for j in range(5):
+            for i in range(width):
+                for j in range(width):
                     a = point
-                    b = self.new_x[i*5+j]
+                    b = self.new_x[i*width+j]
                     if a[0]==b[0] and a[1]==b[1]:
-                        self.new_p[i*5+j] += weigth
+                        self.new_p[i*width+j] += weigth
         self.x = np.copy(self.new_x)
         self.p = np.copy(self.new_p)
-        n = 25
+        n = width**2
         
     def calc_new_point(self):
         ''' Выбираем новую точку плана '''
@@ -140,12 +138,12 @@ class Lab2():
         x, y = np.hsplit(self.x, 2)
         plt.scatter(x, y)
         for i, txt in enumerate(self.p):
-            plt.annotate(str(int(txt*100)), (x[i], y[i]))
-        plt.title('План на шаге: ' + str(iteration), fontsize=19)
-        # plt.xlabel('X', fontsize=10)
-        # plt.ylabel('Y', fontsize=10)
-        # plt.tick_params(axis='both', labelsize=8)
+            plt.annotate(str(int(txt*100)), (x[i] + 0.05, y[i] - 0.05))
+        plt.xticks(self.t)
+        plt.yticks(self.t)
+        plt.title('План на шаге: ' + str(iteration), fontsize=20)
         plt.grid(alpha=0.4)
+        plt.margins(0.1)
         plt.savefig('report/plan' + str(iteration) + '.png')
         plt.clf()
 
@@ -156,10 +154,10 @@ class Lab2():
         '''
         self.generate_initial_guess()
         do_calc = True
-        i = 0
+        s = 0
 
-        while do_calc == True and i < self.max_iter_s:
-            flag = 0
+        while do_calc == True and s < self.max_iter_s:
+            a = 0
             self.alpha = 1 / n
             self.build_matrix_M()
             self.build_matrix_D()
@@ -168,24 +166,21 @@ class Lab2():
             psi_next = self.calc_D()
 
             # Уменьшаем шаг, если метод расходится
-            while psi_next >= psi and flag < self.max_iter_alpha:
-                flag += 1
+            while psi_next >= psi and a < self.max_iter_alpha:
+                a += 1
                 self.alpha /= self.gamma
                 psi = psi_next
                 self.add_new_point()
                 psi_next = self.calc_D()
-            print(i+1, flag)
+
+            print(s+1, a)
             self.clear_plan()
-            self.draw_plan(i+1)
+            self.draw_plan(s+1)
             do_calc = not self.is_plan_optimal()
-            # if i % 21 == 0:
-            #     pass
-            i += 1
+            s += 1
 
     def build_matrix_M(self):
         ''' Построение информационной матрицы M '''
-        # print(self.x)
-        # print(self.p)
         self.M = np.zeros((m, m))
         for i in range(n):
             self.M += self.p[i] * f_vector(self.x[i]) * f_vector_T(self.x[i])
@@ -200,6 +195,7 @@ class Lab2():
         Эллипсоид рассеивания имеет минимальный объём
         '''
         return np.log(det(self.M))
+
 
 
 #-------------------------------------------------------------------------------

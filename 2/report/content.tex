@@ -7,10 +7,10 @@
 {
 	\begin{figure}[!htb] %htbp!
 		\centering
-		\includegraphics[width=0.48\textwidth]{#1}
-		\includegraphics[width=0.48\textwidth]{#2}
-		\includegraphics[width=0.48\textwidth]{#3}
-		\includegraphics[width=0.48\textwidth]{#4}
+		\includegraphics[width=0.4\textwidth]{#1}
+		\includegraphics[width=0.4\textwidth]{#2}
+		\includegraphics[width=0.4\textwidth]{#3}
+		\includegraphics[width=0.4\textwidth]{#4}
 	\end{figure}
 }
 
@@ -39,39 +39,32 @@
 4.	Защитить лабораторную работу.
 
 
-
 %-------------------------------------------------------------------------------
 \section{Анализ}
 
 Задана двухфакторная модель на квадрате [-1, 1].
-
-\( y = \Theta_0 + \Theta_1 \cdot x_1 + \Theta_2 \cdot x_2 + 
-\Theta_3 \cdot x_1 \cdot x_2 + \Theta_4 \cdot x_1^2 + \Theta_5 \cdot x_2^2 \)
+\[ y = \Theta_0 + \Theta_1 \cdot x_1 + \Theta_2 \cdot x_2 + 
+\Theta_3 \cdot x_1 \cdot x_2 + \Theta_4 \cdot x_1^2 + \Theta_5 \cdot x_2^2 \]
 
 Начальный план - полный двухфакторный эксперимент из 25 точек, на уровнях -1, -0.5, 0, +0.5, +1, веса равны 1/25.
 Строить D-оптимальные планы. Последовательный алгоритм.
 
 
-Алгоритм {\bf последовательного алгоритма} синтеза непрерывного оптимального плана:
+Этапы {\bf последовательного алгоритма} синтеза непрерывного оптимального плана:
 
 1. Выбирается невырожденный начальный план $\varepsilon^0$. Номер итерации s = 0.
 
 2. Отыскивается точка глобального эстремума $x^s$:
-
-\( x^s = arg \min_{x \in \hat{X}} \max_{x \in \hat{X}} \varphi(x, \varepsilon^s), \text{ где }
-\varphi(x, \varepsilon) = f^T(x) \frac{d\Phi [M(\varepsilon)] }{ dM(\varepsilon) } f(x) \)
+\[ x^s = arg \min_{x \in \tilde{X}} \max_{x \in \tilde{X}} \varphi(x, \varepsilon^s), \text{ где } \quad \varphi(x, \varepsilon) = f^T(x) \frac{d\Phi [M(\varepsilon)] }{ dM(\varepsilon) } f(x) \]
 
 3. Проверяется приближенное выполнение необходимых и достаточных условий оптимальности планов
-
-\( \left| - \min_{x \in \hat{X}} \max_{x \in \hat{X}} \varphi(x, \varepsilon^s)
-	 + tr M(\varepsilon^s)  \frac{d\Phi [M(\varepsilon)] }{ dM(\varepsilon) } \right| \leq \delta \)
-
+\[ \left| - \min_{x \in \tilde{X}} \max_{x \in \tilde{X}} \varphi(x, \varepsilon^s)
+ + tr M(\varepsilon^s)  \frac{d\Phi [M(\varepsilon)] }{ dM(\varepsilon) } \right| \leq \delta,
+\text{ где} \quad \delta = \left| \min_{x \in \tilde{X}} \max_{x \in \tilde{X}} \varphi(x, \varepsilon^s) \right| \times 0.01 \]
 Если условие выполнено, то работа алгоритма прекращается. В противном случае осуществляется переход на шаг 4.
 
 4. Составляется план
-
-\( \varepsilon^{s+1} = (1 - \alpha^s) \varepsilon^s + \alpha^s \varepsilon(x^s)\)
-
+\[ \varepsilon^{s+1} = (1 - \alpha^s) \varepsilon^s + \alpha^s \varepsilon(x^s)\]
 где $\alpha \in (0,1)$, $\varepsilon(x^s)$ - план, состоящий из одной точки $x^s$.
 
 
@@ -81,10 +74,14 @@
 $\gamma$ раз и повторяются шаги 4-5;
 
 б) если имеет место обратное неравенство, то s замется на s+1 и происходит переход на шаг 2.
+\vspace{5mm}
+
+
 
 В конце происходит процедура "очистки" плана.
+
 1. Точки, тяготеющие к одной из групп, объединяются по правилу
-\( p_j^s = \sum_k=1^l p_{j_k}^s, x_j^s = 1 / p_j^s \sum_k=1^l {x_{j_k}^s p_{j_k}^s} \)
+\[ p_j^s = \sum_k=1^l p_{j_k}^s, x_j^s = 1 / p_j^s \sum_{k=1}^l {x_{j_k}^s p_{j_k}^s} \]
 
 2. Точки с малыми весами, не тяготеющие ни к одной из групп, указанных в 4), выбрасываются.
 Их веса распределяются между остальными точками 
@@ -97,10 +94,10 @@ $\gamma$ раз и повторяются шаги 4-5;
 \section{Визуализация работы алгоритма}
 
 На каждой точке спектра плана указан её вес в процентах:
+Как видно решение сходится к плану, с координатами точек [-1, 0, 1].
 
 \insertFourImages{plan1.png}{plan10.png}{plan20.png}{plan30.png}
 
-Как видно решение сходится к плану, с координатами точек [-1, 0, 1].
 
 
 %-------------------------------------------------------------------------------

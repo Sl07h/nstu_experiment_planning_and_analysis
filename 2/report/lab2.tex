@@ -27,7 +27,6 @@
 \usepackage{geometry}
 \usepackage{pgfplotstable}
 \usepackage[utf8]{inputenc}
-\usepackage[english]{babel}
  
 \setlength{\parindent}{0.7em}
 \setlength{\parskip}{0.7em}
@@ -78,37 +77,37 @@ margin=2cm
 % пример: \insertTitle{Планирование и анализ эксперимента}{1}{ПМ-63}{Кожекин М.В.}{Майер В.А.}{Назарова Т.А.}{Утюганов Д.С.}{1}{2020}
 \newcommand{\insertTitle}[9]{
 \begin{titlepage}
-	\begin{center}
-    	\large
-		Министерство науки и высшего образования Российской Федерации
-		
-		Новосибирский государственный технический университет
-		
-		Кафедра теоретической и прикладной информатики
-		%\vspace{0.25cm}
-		\vfill
-		\textbf #1
-		
-		Лабораторная работа №#2
-		\vfill
-	\end{center}
-	
-	\begin{tabular}{ m{7em}  m{7em} }
-		Факультет: & ФПМИ \\ 
-		Группа: & #3 \\  
-		Студенты: 	& #4 \\
-					& #5 \\
-					& #6 \\
-					& #7 \\	
-		Вариант: & #8
-	\end{tabular}
-	\vfill
+    \begin{center}
+        \large
+        Министерство науки и высшего образования Российской Федерации
+        
+        Новосибирский государственный технический университет
+        
+        Кафедра теоретической и прикладной информатики
+        %\vspace{0.25cm}
+        \vfill
+        \textbf #1
+        
+        Лабораторная работа №#2
+        \vfill
+    \end{center}
+    
+    \begin{tabular}{ m{7em}  m{7em} }
+        Факультет:  & ФПМИ \\ 
+        Группа:     & #3 \\  
+        Студенты:   & #4 \\
+                    & #5 \\
+                    & #6 \\
+                    & #7 \\    
+        Вариант:    & #8
+    \end{tabular}
+    \vfill
 
-	\begin{center}
-		Новосибирск
+    \begin{center}
+        Новосибирск
 
-		#9
-	\end{center}
+        #9
+    \end{center}
 \end{titlepage}
 }
 
@@ -124,22 +123,22 @@ margin=2cm
 \definecolor{backcolour}{rgb}{0.98, 0.98, 0.98}
  
 \lstdefinestyle{mystyle}{
-	backgroundcolor=\color{backcolour},   
-	commentstyle=\color{codegreen},
-	keywordstyle=\color{blue},
-	basicstyle=\fontsize{10}{12}\selectfont\ttfamily,
-   	numberstyle=\tiny\color{codegray},
-	stringstyle=\color{codepurple},
-    	breakatwhitespace=false,         
-	breaklines=true,                 
-	captionpos=b,                    
-	keepspaces=true,                 
-	numbers=left,                    
-	numbersep=5pt,                  
-	showspaces=false,                
-	showstringspaces=false,
-	showtabs=false,                  
-	tabsize=4
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    basicstyle=\fontsize{10}{12}\selectfont\ttfamily,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4
 }
 \lstset{ style=mystyle}
 
@@ -151,13 +150,13 @@ margin=2cm
 % пример: \myCodeInput{c++}{../main.cpp}{main.cpp}
 \newcommand{\myCodeInput}[3]
 {
-	{\bf #2}
-	\lstinputlisting[language=#1]{#3}
+    {\bf #2}
+    \lstinputlisting[language=#1]{#3}
 }
 
 
-\setlength{\abovedisplayskip}{1pt}
-\setlength{\belowdisplayskip}{1pt}
+\setlength{\abovedisplayskip}{0.5pt}
+\setlength{\belowdisplayskip}{0.5pt}
 
 
 
