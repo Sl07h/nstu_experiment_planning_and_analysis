@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from numpy.linalg import det, inv
 
 
+pd.set_option('precision', 3)
 plt.rcParams.update({'font.size': 14})
 k = 2       # число переменных 2: (x,y)
 m = 6       # число параметров a + b*x + c*y + d*x*y + e*x^2 + f*y^2 
@@ -50,14 +52,14 @@ class Lab2():
         ''' Выделение памяти под массивы '''
         self.x = np.ndarray((n, k))
         self.p = np.ndarray(n)
-        self.new_x = np.ndarray((n, k))
-        self.new_p = np.ndarray(n)
         self.t = np.linspace(-1, 1, width)
         self.M = np.ndarray((m, m))
+        self.D = np.ndarray((m, m))
         self.alpha = 1 / n
         self.gamma = 2
         self.max_iter_s = 30
         self.max_iter_alpha = 20
+        self.to_report = [1, 10, 20, 30]
 
     def generate_initial_guess(self):
         ''' Задаём начальное приближение '''
@@ -93,27 +95,55 @@ class Lab2():
         else:
             return False
 
+    def remove_points(self):
+        ''' 
+        Удаление из плана незначительных точек. План после очистки
+        +-+-+
+        -----
+        +-+-+
+        -----
+        +-+-+        
+        '''
+        global n, width
+        n = 9
+        width = 3
+
+        x = np.copy(self.x)
+        p = np.copy(self.p)
+        self.t = np.linspace(-1,1,3)
+
+        weight_to_mult = p[[1,3,11,13,21,23]].sum() + \
+                        np.sum(p[5:10]) + \
+                        np.sum(p[15:20])
+        p /= 1 - weight_to_mult 
+
+        self.x = np.copy(x[[0,2,4,10,12,14,20,22,24]])
+        self.p = np.copy(p[[0,2,4,10,12,14,20,22,24]])
+
     def clear_plan(self):
         ''' Процедура очистки плана '''
         global n
+        x = np.ndarray((width**2, k))
+        p = np.ndarray(width**2)
+
         i = 0
         for x1 in self.t:
             for x2 in self.t:
-                self.new_x[i] = np.array([x1, x2])
+                x[i] = np.array([x1, x2])
                 i+=1
-        self.new_p = np.zeros(width**2)
+        p = np.zeros(width**2)
 
-        for point, weigth in zip(self.x, self.p):
+        for point, weight in zip(self.x, self.p):
             for i in range(width):
                 for j in range(width):
                     a = point
-                    b = self.new_x[i*width+j]
+                    b = x[i*width+j]
                     if a[0]==b[0] and a[1]==b[1]:
-                        self.new_p[i*width+j] += weigth
-        self.x = np.copy(self.new_x)
-        self.p = np.copy(self.new_p)
+                        p[i*width+j] += weight
+        self.x = np.copy(x)
+        self.p = np.copy(p)
         n = width**2
-        
+
     def calc_new_point(self):
         ''' Выбираем новую точку плана '''
         max_fi = -9000
@@ -144,9 +174,18 @@ class Lab2():
         plt.title('План на шаге: ' + str(iteration), fontsize=20)
         plt.grid(alpha=0.4)
         plt.margins(0.1)
-        plt.savefig('report/plan' + str(iteration) + '.png')
+        plt.savefig('pics/plan' + str(iteration) + '.png')
         plt.clf()
 
+    def build_table(self, iteration):
+        ''' Построение таблицы весов плана эксперимента'''
+        tmp = np.copy(self.p)
+        t = tmp.reshape((width, width))
+        d = pd.DataFrame(data = t, columns=self.t, index=self.t)
+        filename = 'tables/' + str(iteration) + '.tex' 
+        with open(filename, 'w') as f:
+            f.writelines(d.to_latex())
+        
     def sequential_algorithm(self):
         '''
         Последовательный алгоритм синтеза непрерывного
@@ -175,9 +214,18 @@ class Lab2():
 
             print(s+1, a)
             self.clear_plan()
-            self.draw_plan(s+1)
+            
+            # Строим таблицы и графики
+            if s in self.to_report:
+                self.draw_plan(s)
+                self.build_table(s)
+
             do_calc = not self.is_plan_optimal()
             s += 1
+
+        self.remove_points()
+        self.draw_plan(s)
+        self.build_table(s)
 
     def build_matrix_M(self):
         ''' Построение информационной матрицы M '''

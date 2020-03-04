@@ -1,5 +1,6 @@
 __pycache__
 *.txt
+*.tex
 *.pdf
 *lab*
 *content*

@@ -7,11 +7,21 @@
 {
 	\begin{figure}[!htb] %htbp!
 		\centering
-		\includegraphics[width=0.4\textwidth]{#1}
-		\includegraphics[width=0.4\textwidth]{#2}
-		\includegraphics[width=0.4\textwidth]{#3}
-		\includegraphics[width=0.4\textwidth]{#4}
+		\includegraphics[width=0.49\textwidth]{../pics/plan#1.png}
+		\includegraphics[width=0.49\textwidth]{../pics/plan#2.png}
+		\includegraphics[width=0.49\textwidth]{../pics/plan#3.png}
+		\includegraphics[width=0.49\textwidth]{../pics/plan#4.png}
 	\end{figure}
+}
+
+
+\newcommand{\insertTable}[1]
+{
+	s = #1
+
+	\input{../tables/#1}
+
+	\vspace{8mm}
 }
 
 
@@ -96,8 +106,32 @@ $\gamma$ раз и повторяются шаги 4-5;
 На каждой точке спектра плана указан её вес в процентах:
 Как видно решение сходится к плану, с координатами точек [-1, 0, 1].
 
-\insertFourImages{plan1.png}{plan10.png}{plan20.png}{plan30.png}
+\insertTable{1}
 
+\insertTable{10}
+
+\vspace{10mm}
+
+\insertTable{20}
+
+\insertTable{30}
+
+
+\insertFourImages{1}{10}{20}{30}
+
+Выход из программы происходит по числу итераций. Как по s, так и по $\alpha$:
+
+> python lab2.py
+
+1 20
+
+2 20
+
+...
+
+29 20
+
+30 20
 
 
 %-------------------------------------------------------------------------------
