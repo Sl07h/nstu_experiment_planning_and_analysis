@@ -5,6 +5,8 @@ __pycache__
 *lab*
 *content*
 *plan*.png
+*research*.png
+*convergence*.png
 !1/plans/*.txt
 !*lab*.pdf
 !*lab*.tex
