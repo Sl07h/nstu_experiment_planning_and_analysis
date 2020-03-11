@@ -8,6 +8,7 @@ __pycache__
 *research*.png
 *convergence*.png
 !1/plans/*.txt
+!3/plans/*.txt
 !*lab*.pdf
 !*lab*.tex
 !*lab*.py
