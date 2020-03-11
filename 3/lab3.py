@@ -5,7 +5,7 @@ from numpy.linalg import det, inv, norm
 
 k = 2       # число переменных 2: (x,y)
 m = 6       # число параметров a + b*x + c*y + d*x*y + e*x^2 + f*y^2 
-MAX_ITER = 100
+MAX_ITER = 50
 
 def f(theta, x):
     return  theta[0] + \
@@ -76,12 +76,14 @@ class Lab3():
             self.x_plan[i] = self.x_grid[j]
             do_calc = not (max_delta < self.delta)
             result[s] = D
-
             if s % 10 == 0 and do_visualisation:
                 self.draw_plan_on_iteration(s)
-
             s += 1
-            # print(s, i, j, max_delta, D)
+            print(s, i, j, max_delta, D)
+
+        if do_calc == False:
+            for i in range(s, self.max_iter):
+                result[i] = result[s-1]
 
         if do_visualisation:
             self.draw_plan_on_iteration(s)
@@ -190,6 +192,8 @@ def research_delta():
         plt.title('D-оптимальность плана от delta')
         plt.legend(title='сетка: {}x{}\nN: {}'.format(width, width, N))
         plt.xticks(t)
+        plt.xlabel('итерации')
+        plt.ylabel(r'$\log(\left| M^{-1}(\varepsilon) \right|)$')
         plt.savefig('pics/research_delta_{}x{}_{}.png'.format(width, width, N), dpi=200)
         plt.clf()
 
@@ -204,6 +208,8 @@ def research_N():
         plt.title('Влияние числа узлов плана')
         plt.legend(title='сетка: {}x{}\ndelta: {:.3f}'.format(width, width, delta))
         plt.xticks(t)
+        plt.xlabel('итерации')
+        plt.ylabel(r'$\log(\left| M^{-1}(\varepsilon) \right|)$')
         plt.savefig('pics/research_N_{}x{}.png'.format(width, width), dpi=200)
         plt.clf()
 
@@ -219,6 +225,8 @@ def research_width():
     plt.title('Влияние числа узлов сетки')
     plt.legend(title='delta: {:.3f}'.format(delta))
     plt.xticks(t)
+    plt.xlabel('итерации')
+    plt.ylabel(r'$\log(\left| M^{-1}(\varepsilon) \right|)$')
     plt.savefig('pics/research_width.png', dpi=200)
     plt.clf()
 
@@ -230,6 +238,8 @@ def show_convergence(N, width, delta):
     plt.title('Сходимость метода Фёдорова')
     plt.text(24, 6, 'сетка: {}x{}\nN: {}\ndelta: {:.3f}'.format(width, width, N, delta))
     plt.xticks(t)
+    plt.xlabel('итерации')
+    plt.ylabel(r'$\log(\left| M^{-1}(\varepsilon) \right|)$')
     plt.savefig('pics/convergence_Fedorov_{}_{}_{:.3f}.png'.format(N, width, delta), dpi=200)
     plt.clf()
 

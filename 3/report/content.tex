@@ -24,10 +24,10 @@
 {
 	\begin{figure}[!htb] %htbp!
 		\centering
-		\includegraphics[width=0.48\textwidth]{../pics/plan_Fedorov_30_#1_0.01_#2.png}
-		\includegraphics[width=0.48\textwidth]{../pics/plan_Fedorov_30_#1_0.01_#3.png}
-		\includegraphics[width=0.48\textwidth]{../pics/plan_Fedorov_30_#1_0.01_#4.png}
-		\includegraphics[width=0.48\textwidth]{../pics/plan_Fedorov_30_#1_0.01_#5.png}
+		\includegraphics[width=0.48\textwidth]{../pics/plan_Fedorov_30_#1_0.010_#2.png}
+		\includegraphics[width=0.48\textwidth]{../pics/plan_Fedorov_30_#1_0.010_#3.png}
+		\includegraphics[width=0.48\textwidth]{../pics/plan_Fedorov_30_#1_0.010_#4.png}
+		\includegraphics[width=0.48\textwidth]{../pics/plan_Fedorov_30_#1_0.010_#5.png}
 	\end{figure}
 }
 
@@ -92,40 +92,47 @@ $ \left( x_j^s, x^s \right) $, для которой выполняется ус
 $ \Delta \left( x_j^s, x^s \right) \geq \delta $. После чего выполняется шаг 4.
 
 
+
 %-------------------------------------------------------------------------------
 \section{Исследования работы алгоритма}
 
+Сходимость алгоритма Фёдорова при N = 30, $\delta = 0.01$ на сетке 11x11, 21x21.
+
+Как видно из 4-х изображений работы метода и графика $\log(\left| M^{-1}(\varepsilon) \right|) $
+на каждой итерации можно понять, что метод на сетке 11x11 сходится за 24 итерации, а на сетке 
+21x21 узел за 29 шагов.
+
 
 %---------------------------------------
-\subsection{Сходимость алгоритма Фёдорова при N = 30, $\delta = 0.01$ на сетке 11x11, 21x21}
-\insertFourImages{10}{0}{10}{20}{40}
+\subsection{Сетка 11x11}
+\insertFourImages{11}{0}{10}{20}{24}
 \vspace{30mm}
 
-\insertImage{../pics/convergence_Fedorov_30_11_0.01.png}
+\insertImage{../pics/convergence_Fedorov_30_11_0.010.png}
 
-\subsection{Сходимость алгоритма Фёдорова при N = 30, $\delta = 0.01$ на сетке 21x21}
+\subsection{Сетка 21x21}
 
-\insertFourImages{20}{0}{10}{20}{40}
+\insertFourImages{21}{0}{10}{20}{29}
 
-
-Исходя из графика можно понять, что критерий D-оптимальности уменьшается, значит, наш алгоритм всё ещё сходится.
-\vspace{30mm}
-
-\insertImage{../pics/convergence_Fedorov_30_21_0.01.png}
+\insertImage{../pics/convergence_Fedorov_30_21_0.010.png}
 
 %---------------------------------------
 \subsection{Влияние шага метода}
 
-Как видно из графиков при уменьшении $\delta$ метод сходится медленнее.
-При увеличении данного параметра метод может разойтись.
+Как видно из графиков при изменении $\delta$ в [0.1, 0.01, 0.001] метод первые 12
+итераций (при сетке 11x11 и 15 на сетке 21x21) сходится одинаково быстро. Затем алгоритм с меньшим шагом находет более
+оптимальное решение.
+
+Особенно это заметно при большем числе узлов сетки.
+
 \insertTwoImages{../pics/research_delta_21x21_20.png}{../pics/research_delta_21x21_40.png}
 
 
 %---------------------------------------
 \subsection{Влияние числа узлов плана}
 
-При малом числе точек плана метод становится неустойчивым.
-Особенно это заметно если множество $\tilde{X}$ также имеет малое число точек
+При малом числе точек плана алгоритм сходится сначала медленнее, а потом быстрее.
+Однако это не так значительно для решения задачи
 \vspace{30mm}
 
 \insertTwoImages{../pics/research_N_11x11.png}{../pics/research_N_21x21.png}
@@ -134,7 +141,8 @@ $ \Delta \left( x_j^s, x^s \right) \geq \delta $. После чего выпол
 %---------------------------------------
 \subsection{Влияние числа узлов сетки}
 
-При увеличиении числа точек сетки метод становится стабильнее, но медленнее сходится.
+При увеличиении числа точек сетки методу требуется больше итераций, однако,
+результат остаётся примерно одинаковым.
 При малых N и n метод расходится.
 \insertImage{../pics/research_width.png}
 
