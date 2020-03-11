@@ -69,19 +69,19 @@ class Lab3():
         result = np.zeros(self.max_iter)
 
         while do_calc == True and s < self.max_iter:
-
             self.build_matrix_M()
             self.build_matrix_D()
-
-            max_delta, i, j = self.replace_two_points()
+            D = self.calc_D()
+            max_delta, i, j = self.find_two_points()
+            self.x_plan[i] = self.x_grid[j]
             do_calc = not (max_delta < self.delta)
-            result[s] = self.calc_D()
+            result[s] = D
 
             if s % 10 == 0 and do_visualisation:
                 self.draw_plan_on_iteration(s)
 
             s += 1
-            print(s, i, j, max_delta, self.calc_D())
+            # print(s, i, j, max_delta, D)
 
         if do_visualisation:
             self.draw_plan_on_iteration(s)
@@ -96,21 +96,32 @@ class Lab3():
         plt.savefig('pics/plan_Fedorov_{}_{}_{:.3f}_{}.png'.format(self.N, self.width, self.delta, s))
         plt.clf()
 
-    def replace_two_points(self):
-        ''' Замена точки из плана на внешнюю '''
+    def find_two_points(self):
+        ''' Поиск точки плана и сетки для их замены '''
         # для начала:
-        max_delta = -9000
+        indicies = np.ndarray((self.N, 2), dtype = np.int64) # Пары i,j
+        max_deltas = np.full(self.N, -9000.0)
+
         # перебираем все точки плана и все точки сетки
         for i, int_point in enumerate(self.x_plan):
             for j, ext_point in enumerate(self.x_grid):
                 delta = self.Delta(int_point, ext_point)[0]
-                # delta = abs(self.Delta(int_point, ext_point))
                 # выбрали пару точек получше
-                if delta > self.delta:
-                    max_delta = delta
-                    self.x_plan[i] = self.x_grid[j]
-                    return max_delta, i, j
-        return max_delta, -1, -1
+                if delta > max_deltas[i]:
+                    max_deltas[i] = delta
+                    indicies[i][0] = i
+                    indicies[i][1] = j
+
+        max_delta_res = -9000.0
+        I = 0
+        J = 0
+        for i, max_delta in enumerate(max_deltas):
+            if max_delta > max_delta_res:
+                max_delta_res = max_delta
+                I = indicies[i][0]
+                J = indicies[i][1]
+        
+        return max_delta_res, I, J
 
     def generate_initial_guess(self):
         ''' Задаём начальное приближение '''
@@ -124,17 +135,17 @@ class Lab3():
 
         # случайно выбираем точки плана и сохраняем
         # for i in range(self.N):
-        #     self.x_plan[i] = self.x_grid[np.random.choice(n)]
-        # np.savetxt('report/plan'+str(self.N)+'.txt', self.x_plan)
+        #     self.x_plan[i] = self.x_grid[np.random.choice(self.n)]
+        # np.savetxt('plans/plan_{}x{}_{}.txt'.format(self.width, self.width, self.N), self.x_plan)
         
         # или же загружаем
-        self.x_plan = np.loadtxt('report/plan'+str(self.N)+'.txt', dtype=np.float)
+        self.x_plan = np.loadtxt('plans/plan_{}x{}_{}.txt'.format(self.width, self.width, self.N), dtype=np.float)
 
     def build_matrix_M(self):
         ''' Построение информационной матрицы M '''
         self.M = np.zeros((m, m))
         for i in range(self.N):
-            self.M += self.p[i] * f_vector(self.x_plan[i]) * f_vector_T(self.x_plan[i])
+            self.M += (self.p[i] * f_vector(self.x_plan[i]) * f_vector_T(self.x_plan[i]))
 
     def build_matrix_D(self):
         ''' Построение дисперсионной матрицы D '''
@@ -145,11 +156,12 @@ class Lab3():
         Критерий D - оптимальности. (D - determinant)
         Эллипсоид рассеивания имеет минимальный объём
         '''
-        return np.log(det(self.M))
+        return np.log(det(self.D))
 
-    def Delta(self, x, x_j):
+    def Delta(self, x_j, x):
         N = float(self.N)
-        return (self.d(x) - self.d(x_j)) / N - (self.d(x) * self.d(x_j) - self.d_2(x,x_j)**2) / N**2
+        return ((self.d(x) - self.d(x_j)) / N) - \
+            ((self.d(x) * self.d(x_j) - self.d_2(x,x_j)**2)/(N**2))
 
     def d(self, x):
         return f_vector_T(x) @ self.D @ f_vector(x)
@@ -168,7 +180,8 @@ def perform_experiment(N, width, delta):
 
 def research_delta():
     ''' Исследование скорости сходимости и устойчивости от delta '''
-    width = 20
+    print('Исследование скорости сходимости и устойчивости от delta')
+    width = 21
     for N in [20, 40]:
         for delta in [0.001, 0.01, 0.1]:
             y = perform_experiment(N, width, delta)
@@ -182,8 +195,9 @@ def research_delta():
 
 def research_N():
     ''' Исследование скорости сходимости и устойчивости от N '''
+    print('Исследование скорости сходимости и устойчивости от N')
     delta = 0.01
-    for width in [10, 20]:
+    for width in [11, 21]:
         for N in [20, 25, 30, 35, 40]:
             y = perform_experiment(N, width, delta)
             plt.plot(y, label=str(N))    
@@ -195,8 +209,9 @@ def research_N():
 
 def research_width():
     ''' Исследование скорости сходимости и устойчивости от числа узлов сетки '''
+    print('Исследование скорости сходимости и устойчивости от числа узлов сетки')
     delta = 0.001
-    for width in [10, 20]:
+    for width in [11, 21]:
         for N in [20, 40]:
             y = perform_experiment(N, width, delta)
             plt.plot(y, label='N: {}  n: {}'.format(N, width**2))    
@@ -208,11 +223,12 @@ def research_width():
     plt.clf()
 
 def show_convergence(N, width, delta):
+    print(N, width, delta)
     l3 = Lab3(N, width, delta)
     y = l3.Fedorov_algorithm(True)
     plt.plot(y)
     plt.title('Сходимость метода Фёдорова')
-    plt.text(10, -22, 'сетка: {}x{}\nN: {}\ndelta: {:.3f}'.format(width, width, N, delta))
+    plt.text(24, 6, 'сетка: {}x{}\nN: {}\ndelta: {:.3f}'.format(width, width, N, delta))
     plt.xticks(t)
     plt.savefig('pics/convergence_Fedorov_{}_{}_{:.3f}.png'.format(N, width, delta), dpi=200)
     plt.clf()
@@ -223,5 +239,5 @@ def show_convergence(N, width, delta):
 research_delta()
 research_N()
 research_width()
-show_convergence(30, 10, 0.01)
-show_convergence(30, 20, 0.01)
+show_convergence(30, 11, 0.01)
+show_convergence(30, 21, 0.01)
