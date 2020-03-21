@@ -1,5 +1,4 @@
 ﻿import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 import numpy as np
 from numpy.linalg import det, inv, norm
 
@@ -53,6 +52,7 @@ class Lab3():
         self.M = np.ndarray((m, m))
         self.D = np.ndarray((m, m))
         self.width = width
+        self.epsilon = 0.001
         self.n = n
         self.delta = delta
         self.max_iter = MAX_ITER
@@ -171,6 +171,79 @@ class Lab3():
     def d_2(self, x, x_j):
         return f_vector_T(x) @ self.D @ f_vector(x_j)
 
+
+    def draw_Mitchell_on_s(self, s):
+        t = np.linspace(-1, 1, 11)
+        plt.title('Алгоритм Митчелла на шаге ' + str(s))
+        plt.scatter([self.x_plan[i][0] for i in range(len(self.x_plan))],[self.x_plan[i][1] for i in range(len(self.x_plan))], )
+        plt.xticks(t)
+        plt.yticks(t)
+        plt.savefig('pics/plan_Mitchell_{}_{}_{:.3f}_{}.png'.format(self.N, self.width, self.delta, s))
+        plt.clf()
+
+
+    def Mitchell_algorithm(self, do_visualisation = True):
+        '''
+        Алгоритм Митчелла синтеза дискретного
+        оптимального плана эксперимента
+        '''
+        self.generate_initial_guess()
+        do_calc = True
+        s = 0
+        result = np.zeros(self.max_iter)
+
+        while do_calc == True and s < self.max_iter:
+            self.build_matrix_M()
+            self.build_matrix_D()
+            new_p, i = self.find_new_point()
+            old_p, j = self.find_old_point()
+            do_calc = norm(new_p - old_p) >= self.epsilon
+            print(s+1, self.calc_D(), new_p, old_p)
+            self.x_plan[j] = self.x_grid[i]
+            result[s] = self.calc_D()
+            
+            if s % 10 == 0 and do_visualisation:
+                self.draw_Mitchell_on_s(s)
+            s += 1
+
+            if do_calc == False:
+                for i in range(s, self.max_iter):
+                    result[i] = result[s-1]
+
+        if do_visualisation:
+            self.draw_Mitchell_on_s(s)
+        return result
+
+    def find_new_point(self):
+        ''' Выбор новой точки плана  max d(x) '''
+        new_i = 0
+        new_point = self.x_grid[0]
+        max_d = self.d(new_point)
+
+        for i, point in enumerate(self.x_grid):
+            d = self.d(point)
+            if d > max_d:
+                new_i = i
+                new_point = point
+        
+        return new_point, new_i
+
+    def find_old_point(self):
+        ''' Выбор страрой точки плана min d(x) '''
+        new_i = 0
+        new_point = self.x_plan[0]
+        min_d = self.d(new_point)
+
+        for i, point in enumerate(self.x_plan):
+            d = self.d(point)
+            if d < min_d:
+                new_i = i
+                new_point = point
+        
+        return new_point, new_i
+
+
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -230,7 +303,7 @@ def research_width():
     plt.savefig('pics/research_width.png', dpi=200)
     plt.clf()
 
-def show_convergence(N, width, delta):
+def show_convergence_Fedorov(N, width, delta):
     print(N, width, delta)
     l3 = Lab3(N, width, delta)
     y = l3.Fedorov_algorithm(True)
@@ -243,11 +316,35 @@ def show_convergence(N, width, delta):
     plt.savefig('pics/convergence_Fedorov_{}_{}_{:.3f}.png'.format(N, width, delta), dpi=200)
     plt.clf()
 
+
+
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-research_delta()
-research_N()
-research_width()
-show_convergence(30, 11, 0.01)
-show_convergence(30, 21, 0.01)
+# research_delta()
+# research_N()
+# research_width()
+# show_convergence_Fedorov(30, 11, 0.01)
+# show_convergence_Fedorov(30, 21, 0.01)
+
+
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+def show_convergence_Mitchell(N, width, delta):
+    print(N, width, delta)
+    l = Lab3(N, width, delta)
+    y = l.Mitchell_algorithm()
+    plt.plot(y)
+    plt.title('Сходимость метода Митчелла')
+    plt.text(24, 6, 'сетка: {}x{}\nN: {}\ndelta: {:.3f}'.format(width, width, N, delta))
+    plt.xticks(t)
+    plt.xlabel('итерации')
+    plt.ylabel(r'$\log(\left| M^{-1}(\varepsilon) \right|)$')
+    plt.savefig('pics/convergence_Mitchell_{}_{}_{:.3f}.png'.format(N, width, delta), dpi=200)
+    plt.clf()
+
+
+show_convergence_Mitchell(30, 21, 0.001)
