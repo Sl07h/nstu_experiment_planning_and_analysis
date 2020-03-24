@@ -171,7 +171,9 @@ class Lab3():
     def d_2(self, x, x_j):
         return f_vector_T(x) @ self.D @ f_vector(x_j)
 
-
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
     def draw_Mitchell_on_s(self, s):
         t = np.linspace(-1, 1, 11)
         plt.title('Алгоритм Митчелла на шаге ' + str(s))
@@ -181,7 +183,6 @@ class Lab3():
         plt.savefig('pics/plan_Mitchell_{}_{}_{:.3f}_{}.png'.format(self.N, self.width, self.delta, s))
         plt.clf()
 
-
     def Mitchell_algorithm(self, do_visualisation = True):
         '''
         Алгоритм Митчелла синтеза дискретного
@@ -190,7 +191,7 @@ class Lab3():
         self.generate_initial_guess()
         do_calc = True
         s = 0
-        result = np.zeros(self.max_iter)
+        result = np.ndarray(self.max_iter)
 
         while do_calc == True and s < self.max_iter:
             self.build_matrix_M()
@@ -215,7 +216,7 @@ class Lab3():
         return result
 
     def find_new_point(self):
-        ''' Выбор новой точки плана  max d(x) '''
+        ''' Выбор новой точки плана  max d(x), x in grid '''
         new_i = 0
         new_point = self.x_grid[0]
         max_d = self.d(new_point)
@@ -229,7 +230,7 @@ class Lab3():
         return new_point, new_i
 
     def find_old_point(self):
-        ''' Выбор страрой точки плана min d(x) '''
+        ''' Выбор страрой точки плана min d(x), x in plan '''
         new_i = 0
         new_point = self.x_plan[0]
         min_d = self.d(new_point)
