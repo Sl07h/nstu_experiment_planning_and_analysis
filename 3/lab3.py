@@ -5,6 +5,8 @@ from numpy.linalg import det, inv, norm
 k = 2       # число переменных 2: (x,y)
 m = 6       # число параметров a + b*x + c*y + d*x*y + e*x^2 + f*y^2 
 MAX_ITER = 50
+t = np.linspace(0, MAX_ITER, 11)
+
 
 def f(theta, x):
     return  theta[0] + \
@@ -58,46 +60,33 @@ class Lab3():
         self.max_iter = MAX_ITER
         self.N = N
 
-    def Fedorov_algorithm(self, do_visualisation = False):
-        '''
-        Алгоритм Фёдорова синтеза дискретного
-        оптимального плана эксперимента
-        '''
-        self.generate_initial_guess()
-        do_calc = True
-        s = 0
-        result = np.zeros(self.max_iter)
-
-        while do_calc == True and s < self.max_iter:
-            self.build_matrix_M()
-            self.build_matrix_D()
-            D = self.calc_D()
-            max_delta, i, j = self.find_two_points()
-            self.x_plan[i] = self.x_grid[j]
-            do_calc = not (max_delta < self.delta)
-            result[s] = D
-            if s % 10 == 0 and do_visualisation:
-                self.draw_plan_on_iteration(s)
-            s += 1
-            print(s, i, j, max_delta, D)
-
-        if do_calc == False:
-            for i in range(s, self.max_iter):
-                result[i] = result[s-1]
-
-        if do_visualisation:
-            self.draw_plan_on_iteration(s)
-        return result
-
-    def draw_plan_on_iteration(self, s):
+    def draw_plan_on_s(self, s, alg_name, path):
         t = np.linspace(-1, 1, 11)
-        plt.title('Алгоритм Фёдорова на шаге ' + str(s))
+        plt.title(alg_name + str(s))
         plt.scatter([self.x_plan[i][0] for i in range(len(self.x_plan))],[self.x_plan[i][1] for i in range(len(self.x_plan))], )
         plt.xticks(t)
         plt.yticks(t)
-        plt.savefig('pics/plan_Fedorov_{}_{}_{:.3f}_{}.png'.format(self.N, self.width, self.delta, s))
+        plt.savefig(path + str(s) + '.png')
         plt.clf()
 
+    def generate_initial_guess(self):
+        ''' Задаём начальное приближение '''
+        # создаём сетку
+        self.t = np.linspace(-1, 1, self.width)
+        i = 0
+        for x1 in self.t:
+            for x2 in self.t:
+                self.x_grid[i] = np.array([x1, x2])
+                i+=1
+
+        # случайно выбираем точки плана и сохраняем
+        # for i in range(self.N):
+        #     self.x_plan[i] = self.x_grid[np.random.choice(self.n)]
+        # np.savetxt('plans/plan_{}x{}_{}.txt'.format(self.width, self.width, self.N), self.x_plan)
+        
+        # или же загружаем
+        self.x_plan = np.loadtxt('plans/plan_{}x{}_{}.txt'.format(self.width, self.width, self.N), dtype=np.float)
+    
     def find_two_points(self):
         ''' Поиск точки плана и сетки для их замены '''
         # для начала:
@@ -124,24 +113,34 @@ class Lab3():
                 J = indicies[i][1]
         
         return max_delta_res, I, J
+    
+    def find_new_point(self, func):
+        ''' Выбор новой точки плана  max func(x), x in grid '''
+        new_i = 0
+        new_point = self.x_grid[0]
+        max_f = func(new_point)
 
-    def generate_initial_guess(self):
-        ''' Задаём начальное приближение '''
-        # создаём сетку
-        self.t = np.linspace(-1, 1, self.width)
-        i = 0
-        for x1 in self.t:
-            for x2 in self.t:
-                self.x_grid[i] = np.array([x1, x2])
-                i+=1
-
-        # случайно выбираем точки плана и сохраняем
-        # for i in range(self.N):
-        #     self.x_plan[i] = self.x_grid[np.random.choice(self.n)]
-        # np.savetxt('plans/plan_{}x{}_{}.txt'.format(self.width, self.width, self.N), self.x_plan)
+        for i, point in enumerate(self.x_grid):
+            f = func(point)
+            if f > max_f:
+                new_i = i
+                new_point = point
         
-        # или же загружаем
-        self.x_plan = np.loadtxt('plans/plan_{}x{}_{}.txt'.format(self.width, self.width, self.N), dtype=np.float)
+        return new_point, new_i
+
+    def find_old_point(self, func):
+        ''' Выбор старой точки плана min func(x), x in plan '''
+        new_i = 0
+        new_point = self.x_plan[0]
+        min_f = func(new_point)
+
+        for i, point in enumerate(self.x_plan):
+            f = func(point)
+            if f < min_f:
+                new_i = i
+                new_point = point
+        
+        return new_point, new_i
 
     def build_matrix_M(self):
         ''' Построение информационной матрицы M '''
@@ -160,6 +159,10 @@ class Lab3():
         '''
         return np.log(det(self.D))
 
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
     def Delta(self, x_j, x):
         N = float(self.N)
         return ((self.d(x) - self.d(x_j)) / N) - \
@@ -171,23 +174,21 @@ class Lab3():
     def d_2(self, x, x_j):
         return f_vector_T(x) @ self.D @ f_vector(x_j)
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-    def draw_Mitchell_on_s(self, s):
-        t = np.linspace(-1, 1, 11)
-        plt.title('Алгоритм Митчелла на шаге ' + str(s))
-        plt.scatter([self.x_plan[i][0] for i in range(len(self.x_plan))],[self.x_plan[i][1] for i in range(len(self.x_plan))], )
-        plt.xticks(t)
-        plt.yticks(t)
-        plt.savefig('pics/plan_Mitchell_{}_{}_{:.3f}_{}.png'.format(self.N, self.width, self.delta, s))
-        plt.clf()
+    def fi(self, x):
+        return f_vector_T(x) @ self.D @ self.D @ f_vector(x)
+        
 
-    def Mitchell_algorithm(self, do_visualisation = True):
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+    def Fedorov_algorithm(self, do_visualisation = False):
         '''
-        Алгоритм Митчелла синтеза дискретного
+        Алгоритм Фёдорова синтеза дискретного
         оптимального плана эксперимента
         '''
+        alg_name = 'Алгоритм Фёдорова на шаге '
+        path = 'pics/plan_Fedorov_{}_{}_{:.3f}_'.format(self.N, self.width, self.delta)
+
         self.generate_initial_guess()
         do_calc = True
         s = 0
@@ -196,71 +197,117 @@ class Lab3():
         while do_calc == True and s < self.max_iter:
             self.build_matrix_M()
             self.build_matrix_D()
-            new_p, i = self.find_new_point()
-            old_p, j = self.find_old_point()
+            D = self.calc_D()
+            max_delta, i, j = self.find_two_points()
+            self.x_plan[i] = self.x_grid[j]
+            do_calc = not (max_delta < self.delta)
+            result[s] = D
+            if s % 10 == 0 and do_visualisation:
+                self.draw_plan_on_s(s, alg_name, path)
+            s += 1
+            print(s, i, j, max_delta, D)
+
+        if do_calc == False:
+            for i in range(s, self.max_iter):
+                result[i] = result[s-1]
+
+        return result
+
+    def Mitchell_algorithm(self, do_visualisation = False):
+        '''
+        Алгоритм Митчелла синтеза дискретного
+        оптимального плана эксперимента
+        '''
+        alg_name = 'Алгоритм Митчелла на шаге '
+        path = 'pics/plan_Mitchell_{}_{}_{:.3f}_'.format(self.N, self.width, self.delta)
+
+        self.generate_initial_guess()
+        do_calc = True
+        s = 0
+        result = np.ndarray(self.max_iter)
+
+        while do_calc == True and s < self.max_iter:
+            self.build_matrix_M()
+            self.build_matrix_D()
+            new_p, i = self.find_new_point(self.d)
+            old_p, j = self.find_old_point(self.d)
             do_calc = norm(new_p - old_p) >= self.epsilon
-            print(s+1, self.calc_D(), new_p, old_p)
             self.x_plan[j] = self.x_grid[i]
             result[s] = self.calc_D()
-            
-            if s % 10 == 0 and do_visualisation:
-                self.draw_Mitchell_on_s(s)
+            if s % 5 == 0 and do_visualisation:
+                self.draw_plan_on_s(s, alg_name, path)
             s += 1
+            print(s+1, self.calc_D(), new_p, old_p)
 
             if do_calc == False:
                 for i in range(s, self.max_iter):
                     result[i] = result[s-1]
 
-        if do_visualisation:
-            self.draw_Mitchell_on_s(s)
         return result
 
-    def find_new_point(self):
-        ''' Выбор новой точки плана  max d(x), x in grid '''
-        new_i = 0
-        new_point = self.x_grid[0]
-        max_d = self.d(new_point)
-
-        for i, point in enumerate(self.x_grid):
-            d = self.d(point)
-            if d > max_d:
-                new_i = i
-                new_point = point
+    def gradient_algorithm(self, do_visualisation = False):
+        '''
+        Градиентный алгоритмы синтеза дискретного
+        оптимального плана эксперимента
+        '''
+        alg_name = 'Градиентный алгоритм на шаге '
+        path = 'pics/plan_grad_alg_{}_{}_{:.3f}_'.format(self.N, self.width, self.delta)
         
-        return new_point, new_i
+        self.generate_initial_guess()
+        do_calc = True
+        s = 0
+        result = np.ndarray(self.max_iter)
 
-    def find_old_point(self):
-        ''' Выбор страрой точки плана min d(x), x in plan '''
-        new_i = 0
-        new_point = self.x_plan[0]
-        min_d = self.d(new_point)
+        while do_calc == True and s < self.max_iter:
+            self.build_matrix_M()
+            self.build_matrix_D()
+            new_p, i = self.find_new_point(self.fi)
+            old_p, j = self.find_old_point(self.fi)
+            
+            # проверяем совпали ли точки
+            do_calc = norm(new_p - old_p) >= self.epsilon
+            self.x_plan[j] = self.x_grid[i]
+            result[s] = self.calc_D()
+            
+            if s % 10 == 0 and do_visualisation:
+                self.draw_plan_on_s(s, alg_name, path)
+            s += 1
+            print(s+1, self.calc_D(), new_p, old_p)
 
-        for i, point in enumerate(self.x_plan):
-            d = self.d(point)
-            if d < min_d:
-                new_i = i
-                new_point = point
-        
-        return new_point, new_i
+            if do_calc == False:
+                for i in range(s, self.max_iter):
+                    result[i] = result[s-1]
 
+        return result
 
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-t = np.linspace(0, MAX_ITER, 11)
+def perform_experiment(N, width, delta, method = 'Fedorov', do_visualisation = False):
+    ''' 
+    Отдельный эксперимент:
+    N       - число узлов плана,
+    width   - ширина сетки,
+    delta   - точность,
+    method  - Fedorov, Mitchell, gradient.
+    '''
+    l = Lab3(N, width, delta)
+    algorithm = {
+        'Fedorov': l.Fedorov_algorithm,
+        'Mitchell': l.Mitchell_algorithm,
+        'gradient': l.gradient_algorithm
+    }
+    algorithm = algorithm[method]
+    return algorithm(do_visualisation)
 
-def perform_experiment(N, width, delta):
-    l3 = Lab3(N, width, delta)
-    return l3.Fedorov_algorithm()
-
-def research_delta():
+def research_delta(method = 'Fedorov'):
     ''' Исследование скорости сходимости и устойчивости от delta '''
     print('Исследование скорости сходимости и устойчивости от delta')
     width = 21
     for N in [20, 40]:
         for delta in [0.001, 0.01, 0.1]:
-            y = perform_experiment(N, width, delta)
+            y = perform_experiment(N, width, delta, method, False)
             plt.plot(y, label=str(delta))    
 
         plt.title('D-оптимальность плана от delta')
@@ -271,13 +318,13 @@ def research_delta():
         plt.savefig('pics/research_delta_{}x{}_{}.png'.format(width, width, N), dpi=200)
         plt.clf()
 
-def research_N():
+def research_N(method = 'Fedorov'):
     ''' Исследование скорости сходимости и устойчивости от N '''
     print('Исследование скорости сходимости и устойчивости от N')
     delta = 0.01
     for width in [11, 21]:
         for N in [20, 25, 30, 35, 40]:
-            y = perform_experiment(N, width, delta)
+            y = perform_experiment(N, width, delta, method, False)
             plt.plot(y, label=str(N))    
         plt.title('Влияние числа узлов плана')
         plt.legend(title='сетка: {}x{}\ndelta: {:.3f}'.format(width, width, delta))
@@ -287,13 +334,13 @@ def research_N():
         plt.savefig('pics/research_N_{}x{}.png'.format(width, width), dpi=200)
         plt.clf()
 
-def research_width():
+def research_width(method = 'Fedorov'):
     ''' Исследование скорости сходимости и устойчивости от числа узлов сетки '''
     print('Исследование скорости сходимости и устойчивости от числа узлов сетки')
     delta = 0.001
     for width in [11, 21]:
         for N in [20, 40]:
-            y = perform_experiment(N, width, delta)
+            y = perform_experiment(N, width, delta, method, False)
             plt.plot(y, label='N: {}  n: {}'.format(N, width**2))    
 
     plt.title('Влияние числа узлов сетки')
@@ -304,48 +351,52 @@ def research_width():
     plt.savefig('pics/research_width.png', dpi=200)
     plt.clf()
 
-def show_convergence_Fedorov(N, width, delta):
-    print(N, width, delta)
-    l3 = Lab3(N, width, delta)
-    y = l3.Fedorov_algorithm(True)
-    plt.plot(y)
-    plt.title('Сходимость метода Фёдорова')
-    plt.text(24, 6, 'сетка: {}x{}\nN: {}\ndelta: {:.3f}'.format(width, width, N, delta))
-    plt.xticks(t)
-    plt.xlabel('итерации')
-    plt.ylabel(r'$\log(\left| M^{-1}(\varepsilon) \right|)$')
-    plt.savefig('pics/convergence_Fedorov_{}_{}_{:.3f}.png'.format(N, width, delta), dpi=200)
-    plt.clf()
-
-
-
-
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-# research_delta()
-# research_N()
-# research_width()
-# show_convergence_Fedorov(30, 11, 0.01)
-# show_convergence_Fedorov(30, 21, 0.01)
-
-
-
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-def show_convergence_Mitchell(N, width, delta):
+def show_convergence_of_method(N, width, delta, method = 'Fedorov'):
+    ''' 
+    Отрисовка сходимости метода:
+    N       - число узлов плана,
+    width   - ширина сетки,
+    delta   - точность,
+    method  - Fedorov, Mitchell, gradient.
+    '''
     print(N, width, delta)
     l = Lab3(N, width, delta)
-    y = l.Mitchell_algorithm()
+    
+    algorithm = {
+        'Fedorov': l.Fedorov_algorithm,
+        'Mitchell': l.Mitchell_algorithm,
+        'gradient': l.gradient_algorithm
+    }
+    algorithm = algorithm[method]
+    title = {
+        'Fedorov': 'Сходимость метода Фёдорова',
+        'Mitchell': 'Сходимость метода Митчелла',
+        'gradient': 'Сходимость градиентного алгоритма'
+    }
+    title = title[method]
+    path = {
+        'Fedorov': 'pics/convergence_Fedorov_{}_{}_{:.3f}.png'.format(N, width, delta),
+        'Mitchell': 'pics/convergence_Mitchell_{}_{}_{:.3f}.png'.format(N, width, delta),
+        'gradient': 'pics/convergence_grad_alg_{}_{}_{:.3f}.png'.format(N, width, delta)
+    }
+    path = path[method]
+
+    y = algorithm(False)
     plt.plot(y)
-    plt.title('Сходимость метода Митчелла')
+    plt.title(title)
     plt.text(24, 6, 'сетка: {}x{}\nN: {}\ndelta: {:.3f}'.format(width, width, N, delta))
     plt.xticks(t)
     plt.xlabel('итерации')
     plt.ylabel(r'$\log(\left| M^{-1}(\varepsilon) \right|)$')
-    plt.savefig('pics/convergence_Mitchell_{}_{}_{:.3f}.png'.format(N, width, delta), dpi=200)
+    plt.savefig(path, dpi=200)
     plt.clf()
 
 
-show_convergence_Mitchell(30, 21, 0.001)
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+research_delta('gradient')
+research_N('gradient')
+research_width('gradient')
+show_convergence_of_method(30, 21, 0.01, 'gradient')
