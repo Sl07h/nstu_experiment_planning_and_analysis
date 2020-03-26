@@ -205,7 +205,7 @@ class Lab3():
             if s % 10 == 0 and do_visualisation:
                 self.draw_plan_on_s(s, alg_name, path)
             s += 1
-            print(s, i, j, max_delta, D)
+            print('{}   det(D): {:.2f}   max_delta: {}   i: {}   j: {}'.format(s, D, max_delta, i, j))
 
         if do_calc == False:
             for i in range(s, self.max_iter):
@@ -237,7 +237,7 @@ class Lab3():
             if s % 5 == 0 and do_visualisation:
                 self.draw_plan_on_s(s, alg_name, path)
             s += 1
-            print(s+1, self.calc_D(), new_p, old_p)
+            print('{}   det(D): {:.2f}   new_p: {}   old_p: {}'.format(s, self.calc_D(), new_p, old_p))
 
             if do_calc == False:
                 for i in range(s, self.max_iter):
@@ -272,7 +272,7 @@ class Lab3():
             if s % 10 == 0 and do_visualisation:
                 self.draw_plan_on_s(s, alg_name, path)
             s += 1
-            print(s+1, self.calc_D(), new_p, old_p)
+            print('{}   det(D): {:.2f}   new_p: {}   old_p: {}'.format(s, self.calc_D(), new_p, old_p))
 
             if do_calc == False:
                 for i in range(s, self.max_iter):
@@ -392,11 +392,14 @@ def show_convergence_of_method(N, width, delta, method = 'Fedorov'):
     plt.clf()
 
 
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# method = 'Fedorov'
+method = 'Mitchell'
+# method = 'gradient'
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-research_delta('gradient')
-research_N('gradient')
-research_width('gradient')
-show_convergence_of_method(30, 21, 0.01, 'gradient')
+# research_delta(method)
+# research_N(method)
+# research_width(method)
+show_convergence_of_method(30, 21, 0.01, method)
