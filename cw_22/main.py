@@ -178,6 +178,7 @@ class Coursework():
 
                 self.build_matrix_M()
                 self.build_matrix_D()
+                A_prev = A
                 A = self.calc_A()
 
                 # шаг 6
@@ -188,14 +189,12 @@ class Coursework():
                     n_indicies.remove(max_j)
                 else:
                     do_replaces = False
-                A_prev = A
-
             result[s] = A
             
             if s % 10 == 0 and do_visualisation:
                 self.draw_plan_on_s(s, A)
             s += 1
-            print('{}   det(M^-2): {:.2f}'.format(s, A))
+            print('s: {},  Psi: {:.2f}'.format(s, A))
 
         if do_calc == False:
             for i in range(s, MAX_ITER):
@@ -292,7 +291,7 @@ def draw_mu():
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-# draw_mu()
+draw_mu()
 research_N()
 research_d2()
 show_convergence_of_grad_alg(20, True)
