@@ -8,6 +8,8 @@ __pycache__
 *plan*.png
 *research*.png
 *convergence*.png
+cw_*/pics/fi_*.png
+
 !1/plans/*.txt
 !3/plans/*.txt
 !cw_22/plans/*.txt
