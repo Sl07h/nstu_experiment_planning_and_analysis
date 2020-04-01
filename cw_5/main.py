@@ -202,12 +202,6 @@ class Coursework():
         Fi = np.copy(self.grid)
         for i in range(grid_width):
             Fi[i] = self.fi(X[i])
-        
-        # нормализуем
-        min_Fi = np.min(Fi)
-        max_Fi = np.max(Fi)
-        Fi = Fi - min_Fi
-        Fi = Fi / (max_Fi - min_Fi)
 
         plt.plot(X, Fi)
         plt.title('fi на начальном приближении,\n$\Delta$: {:.1f}, $\Psi$: {:.2f}'.format(Delta, Psi))
